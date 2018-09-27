@@ -89,6 +89,7 @@ SHARE                                                             return 'SHARE'
 MODE                                                              return 'MODE'
 OJ                                                                return 'OJ'
 LIMIT                                                             return 'LIMIT'
+CAST                                                              return 'CAST'
 
 ","                                                               return ','
 "="                                                               return '='
@@ -115,6 +116,8 @@ LIMIT                                                             return 'LIMIT'
 "<"                                                               return '<'
 "{"                                                               return '{'
 "}"                                                               return '}'
+"["                                                               return '['
+"]"                                                               return ']'
 ";"                                                               return ';'
                                                                  
 ['](\\.|[^'])*[']                                                 return 'STRING'
@@ -296,6 +299,9 @@ identifier
   : IDENTIFIER { $$ = { type: 'Identifier', value: $1 } }
   | identifier DOT IDENTIFIER { $$ = $1; $1.value += '.' + $3 }
   ;
+delimited_identifier
+  : '[' IDENTIFIER ']' { $$ = {type: 'DelimitedIdentifier', value: '[' + $2 + ']'} }
+  ;
 identifier_list
   : identifier { $$ = { type: 'IdentifierList', value: [ $1 ] } }
   | identifier_list ',' identifier { $$ = $1; $1.value.push($3); }
@@ -322,9 +328,20 @@ simple_expr_prefix
   | '!' simple_expr %prec UNOT { $$ = { type: 'Prefix', prefix: $1, value: $2 } }
   |  BINARY simple_expr { $$ = { type: 'Prefix', prefix: $1, value: $2 } }
   ;
+cast_type
+  : IDENTIFIER { $$ = $1 }
+  | IDENTIFIER '(' NUMERIC ')' { $$ = $1 + '(' + $3 + ')' }
+  ;
+cast_function
+  : CAST '(' simple_expr AS cast_type ')' { $$ = { type: 'CastFunction', castIdentifier: $3, castType: $5 } }
+  ;
+right_function
+  : RIGHT '(' simple_expr ',' NUMERIC ')' { $$ = { type: 'RightFunction', characterExpression: $3, integerExpression: $5 } }
+  ;
 simple_expr
   : literal { $$ = $1 }
   | identifier { $$ = $1 }
+  | delimited_identifier {$$ = $1 }
   | function_call { $$ = $1 }
   | simple_expr_prefix { $$ = $1 }
   | '(' expr_list ')' { $$ = { type: 'SimpleExprParentheses', value: $2 } }
@@ -333,6 +350,8 @@ simple_expr
   | EXISTS '(' selectClause ')' { $$ = { type: 'SubQuery', value: $3, hasExists: true } }
   | '{' identifier expr '}' { $$ = { type: 'IdentifierExpr', identifier: $2, value: $3 } }
   | case_when { $$ = $1 }
+  | cast_function { $$ = $1 }
+  | right_function { $$ = $1 }
   ;
 bit_expr
   : simple_expr { $$ = $1 }

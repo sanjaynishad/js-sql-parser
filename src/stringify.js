@@ -1,12 +1,12 @@
-if (!sqlParser) {
-  sqlParser = {};
+if (!tsqlParser) {
+  tsqlParser = {};
 }
 
 function Sql() {
   this.buffer = '';
 }
 
-sqlParser.stringify = function (ast) {
+tsqlParser.stringify = function (ast) {
   var sql = new Sql();
   sql.travelMain(ast);
   return sql.buffer;
@@ -536,4 +536,30 @@ Sql.prototype.travelTableFactor = function (ast) {
   if (ast.indexHintOpt) {
     this.travel(ast.indexHintOpt);
   }
+}
+
+Sql.prototype.travelDelimitedIdentifier = function (ast) {
+    this.append(ast.value);
+}
+
+Sql.prototype.travelCastFunction = function (ast) {
+    this.appendKeyword('cast');
+    this.append('(', true, true);
+    if (ast.castIdentifier) {
+        this.travel(ast.castIdentifier);
+    }
+    this.appendKeyword('as');
+    if (ast.castType) {
+        this.append(ast.castType);
+    }
+    this.append(')', true);
+}
+
+Sql.prototype.travelRightFunction = function (ast) {
+    this.appendKeyword('right');
+    this.append('(', true, true);
+    this.travel(ast.characterExpression);
+    this.append(',', true);
+    this.append(ast.integerExpression);
+    this.append(')', true);
 }

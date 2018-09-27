@@ -1,20 +1,20 @@
 {
-  "name": "js-sql-parser",
-  "version": "1.0.7",
+  "name": "js-tsql-parser",
+  "version": "1.0.0",
   "description": "",
-  "main": "./dist/parser/sqlParser.js",
+  "main": "./dist/parser/tsqlParser.js",
   "scripts": {
-    "build": "jison -m js ./src/sqlParser.jison -o ./dist/parser/sqlParser.js && npm run build-concat",
-    "build-concat": "cat src/stringify.js src/suffix.js >> ./dist/parser/sqlParser.js",
+    "build": "jison -m js ./src/sqlParser.jison -o ./dist/parser/tsqlParser.js && npm run build-concat",
+    "build-concat": "cat src/stringify.js src/suffix.js >> ./dist/parser/tsqlParser.js",
     "postbuild": "npm run test:build",
     "test": "npm run build",
     "test:all": "mocha --require babel-register",
-    "test:build": "mocha --require babel-register 'test/*.test.js'",
+    "test:build": "mocha --require babel-register test/*.test.js",
     "test:benchmark": "mocha --require babel-register test/benchmark.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JavaScriptor/js-sql-parser.git"
+    "url": "git+https://github.com/sanjaynishad/js-tsql-parser.git"
   },
   "keywords": [
     "js",
@@ -23,9 +23,9 @@
   "author": "albin zeng",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/JavaScriptor/js-sql-parser/issues"
+    "url": "https://github.com/sanjaynishad/js-tsql-parser/issues"
   },
-  "homepage": "https://github.com/JavaScriptor/js-sql-parser#readme",
+  "homepage": "https://github.com/sanjaynishad/js-tsql-parser#readme",
   "devDependencies": {
     "babel-preset-es2015": "^6.22.0",
     "babel-register": "^6.22.0",

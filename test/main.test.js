@@ -360,5 +360,15 @@ describe('select grammar support', function () {
     testParser('SELECT COUNT(*) AS total, a b, b as c, c/2 d, d & e an FROM b');
   });
 
+  it('delimited identifier', function () {
+      testParser("select * from a where b = [c]");
+  });
+  it('RIGHT function', function () {
+      testParser("select * from a where right(b, 3) = [c]");
+  });
+  it('CAST function', function () {
+      testParser("select * from a where cast(b as varchar(3)) = [c]");
+  });
+
 });
 
