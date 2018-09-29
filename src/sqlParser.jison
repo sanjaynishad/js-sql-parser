@@ -57,6 +57,7 @@ AND                                                               return 'AND'
 OR                                                                return 'OR'
 XOR                                                               return 'XOR'
 FROM                                                              return 'FROM'
+PARTITION\s+BY                                                    return 'PARTITION_BY'
 PARTITION                                                         return 'PARTITION'
 USE                                                               return 'USE'
 INDEX                                                             return 'INDEX'
@@ -90,6 +91,8 @@ MODE                                                              return 'MODE'
 OJ                                                                return 'OJ'
 LIMIT                                                             return 'LIMIT'
 CAST                                                              return 'CAST'
+OVER                                                              return 'OVER'
+NEXT\s+VALUE\s+FOR                                                return 'NEXT_VALUE_FOR'
 
 ","                                                               return ','
 "="                                                               return '='
@@ -256,6 +259,7 @@ selectExpr
 selectExprAliasOpt
   : { $$ = {alias: null, hasAs: null} }
   | AS IDENTIFIER { $$ = {alias: $2, hasAs: true} }
+  | AS string { $$ = {alias: $2.value, hasAs: true} }
   | IDENTIFIER { $$ = {alias: $1, hasAs: false} }
   ;
 
@@ -298,9 +302,15 @@ function_call_param
 identifier
   : IDENTIFIER { $$ = { type: 'Identifier', value: $1 } }
   | identifier DOT IDENTIFIER { $$ = $1; $1.value += '.' + $3 }
+  | identifier DOT delimited_identifier { $$ = $3; $3.value = $1.value + '.' + $3.value }
+  | delimited_identifier DOT delimited_identifier { $$ = $1; $1.value = $1.value + '.' + $3.value }
+  ;
+spaced_identifier
+  : IDENTIFIER { $$ = $1 }
+  | spaced_identifier IDENTIFIER { $$ = $1 + ' ' + $2 }
   ;
 delimited_identifier
-  : '[' IDENTIFIER ']' { $$ = {type: 'DelimitedIdentifier', value: '[' + $2 + ']'} }
+  : '[' spaced_identifier ']' { $$ = {type: 'DelimitedIdentifier', value: '[' + $2 + ']'} }
   ;
 identifier_list
   : identifier { $$ = { type: 'IdentifierList', value: [ $1 ] } }
@@ -333,10 +343,27 @@ cast_type
   | IDENTIFIER '(' NUMERIC ')' { $$ = $1 + '(' + $3 + ')' }
   ;
 cast_function
-  : CAST '(' simple_expr AS cast_type ')' { $$ = { type: 'CastFunction', castIdentifier: $3, castType: $5 } }
+  : CAST '(' expr AS cast_type ')' { $$ = { type: 'CastFunction', castIdentifier: $3, castType: $5 } }
   ;
 right_function
-  : RIGHT '(' simple_expr ',' NUMERIC ')' { $$ = { type: 'RightFunction', characterExpression: $3, integerExpression: $5 } }
+  : RIGHT '(' expr ',' NUMERIC ')' { $$ = { type: 'RightFunction', characterExpression: $3, integerExpression: $5 } }
+  ;
+next_value_for
+  : NEXT_VALUE_FOR identifier { $$ = { type: 'NextValueFor', value: $2 }}
+  ;
+partition_by_opt
+  : { $$ = null }
+  | partition_by { $$ = $1 }
+  ;
+partition_by
+  : PARTITION_BY expr { $$ = { type: 'PartitionBy', value: $2 } }
+  ;
+over
+  : OVER '(' partition_by_opt order_by_opt ')' { $$ = { type: 'OverClause', partitionBy: $3, orderBy: $4 }}
+  ;
+over_clause
+  : function_call over { $$ = $2; $2.left = $1 }
+  | next_value_for over { $$ = $2; $2.left = $1 }
   ;
 simple_expr
   : literal { $$ = $1 }
@@ -352,6 +379,8 @@ simple_expr
   | case_when { $$ = $1 }
   | cast_function { $$ = $1 }
   | right_function { $$ = $1 }
+  | over_clause { $$ = $1 }
+  | next_value_for { $$ = $1 }
   ;
 bit_expr
   : simple_expr { $$ = $1 }

@@ -360,14 +360,40 @@ describe('select grammar support', function () {
     testParser('SELECT COUNT(*) AS total, a b, b as c, c/2 d, d & e an FROM b');
   });
 
-  it('delimited identifier', function () {
+  it('delimited identifier test1', function () {
       testParser("select * from a where b = [c]");
   });
+
+  it('delimited identifier test2', function () {
+      testParser("select [a b].[c].[d] from a where e = 12");
+  });
+
   it('RIGHT function', function () {
       testParser("select * from a where right(b, 3) = [c]");
   });
   it('CAST function', function () {
       testParser("select * from a where cast(b as varchar(3)) = [c]");
+  });
+
+  it('OVER Clause', function () {
+      testParser('select AVG(OrderQty) OVER(PARTITION BY PostalCode) AS "Row Number", [b], [c] as Job from Name where a = 2');
+  });
+
+  it('OVER Clause test2', function () {
+      testParser('select ROW_NUMBER() OVER(PARTITION BY PostalCode ORDER BY SalesYTD DESC) AS "Row Number", [b], [c] as Job from Name where a = 2');
+  });
+
+  it('OVER Clause test3', function () {
+      testParser('select CONVERT(varchar(20),AVG(SalesYTD) OVER (PARTITION BY TerritoryID   '
+                    +'ORDER BY DATEPART(yy, ModifiedDate)), 1) AS MovingAvg from tbl');
+  });
+
+  it('NEXT VALUE FOR', function () {
+      testParser('SELECT NEXT VALUE FOR Test.CountBy1 AS FirstUse');
+  });
+
+  it('NEXT VALUE FOR and Over Clause', function () {
+      testParser('SELECT NEXT VALUE FOR Test.CountBy1 OVER (ORDER BY LastName) AS ListNumber, FirstName, LastName FROM Person.Contact');
   });
 
 });

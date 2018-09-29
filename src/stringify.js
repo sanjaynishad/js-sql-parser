@@ -563,3 +563,22 @@ Sql.prototype.travelRightFunction = function (ast) {
     this.append(ast.integerExpression);
     this.append(')', true);
 }
+
+Sql.prototype.travelNextValueFor = function (ast) {
+    this.appendKeyword('next value for');
+    this.travel(ast.value);
+}
+
+Sql.prototype.travelPartitionBy = function (ast) {
+    this.appendKeyword('partition by');
+    this.travel(ast.value);
+}
+
+Sql.prototype.travelOverClause = function (ast) {
+    this.travel(ast.left);
+    this.appendKeyword('over');
+    this.append('(', true, true);
+    this.travel(ast.partitionBy);
+    this.travel(ast.orderBy);
+    this.append(')', true);
+}
