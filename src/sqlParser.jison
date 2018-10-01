@@ -346,7 +346,10 @@ cast_function
   : CAST '(' expr AS cast_type ')' { $$ = { type: 'CastFunction', castIdentifier: $3, castType: $5 } }
   ;
 right_function
-  : RIGHT '(' expr ',' NUMERIC ')' { $$ = { type: 'RightFunction', characterExpression: $3, integerExpression: $5 } }
+  : RIGHT '(' expr ',' expr ')' { $$ = { type: 'RightFunction', characterExpression: $3, integerExpression: $5 } }
+  ;
+left_function
+  : LEFT '(' expr ',' expr ')' { $$ = { type: 'LeftFunction', characterExpression: $3, integerExpression: $5 } }
   ;
 next_value_for
   : NEXT_VALUE_FOR identifier { $$ = { type: 'NextValueFor', value: $2 }}
@@ -356,7 +359,7 @@ partition_by_opt
   | partition_by { $$ = $1 }
   ;
 partition_by
-  : PARTITION_BY expr { $$ = { type: 'PartitionBy', value: $2 } }
+  : PARTITION_BY expr_list { $$ = { type: 'PartitionBy', value: $2 } }
   ;
 over
   : OVER '(' partition_by_opt order_by_opt ')' { $$ = { type: 'OverClause', partitionBy: $3, orderBy: $4 }}
@@ -379,6 +382,7 @@ simple_expr
   | case_when { $$ = $1 }
   | cast_function { $$ = $1 }
   | right_function { $$ = $1 }
+  | left_function { $$ = $1 }
   | over_clause { $$ = $1 }
   | next_value_for { $$ = $1 }
   ;

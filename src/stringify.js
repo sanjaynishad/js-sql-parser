@@ -564,6 +564,15 @@ Sql.prototype.travelRightFunction = function (ast) {
     this.append(')', true);
 }
 
+Sql.prototype.travelLeftFunction = function (ast) {
+    this.appendKeyword('left');
+    this.append('(', true, true);
+    this.travel(ast.characterExpression);
+    this.append(',', true);
+    this.append(ast.integerExpression);
+    this.append(')', true);
+}
+
 Sql.prototype.travelNextValueFor = function (ast) {
     this.appendKeyword('next value for');
     this.travel(ast.value);

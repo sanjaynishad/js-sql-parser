@@ -369,8 +369,13 @@ describe('select grammar support', function () {
   });
 
   it('RIGHT function', function () {
-      testParser("select * from a where right(b, 3) = [c]");
+      testParser("select * from a where right(b, 3 + 3) = [c]");
   });
+
+  it('LEFT function', function () {
+      testParser("select * from a where left(b, a + 3) = c");
+  });
+
   it('CAST function', function () {
       testParser("select * from a where cast(b as varchar(3)) = [c]");
   });
