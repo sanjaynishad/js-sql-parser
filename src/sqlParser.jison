@@ -49,6 +49,7 @@ BETWEEN                                                           return 'BETWEE
 IN                                                                return 'IN'
 SOUNDS                                                            return 'SOUNDS'
 LIKE                                                              return 'LIKE'
+RLIKE                                                             return 'RLIKE'
 ESCAPE                                                            return 'ESCAPE'
 REGEXP                                                            return 'REGEXP'
 IS                                                                return 'IS'
@@ -409,6 +410,10 @@ escape_opt
   : { $$ = null }
   | ESCAPE simple_expr { $$ = $2 }
   ;
+regexp_or_rlike
+  : REGEXP { $$ = 'RegexpPredicate' }
+  | RLIKE { $$ = 'RLikePredicate' }
+  ;
 predicate
   : bit_expr { $$ = $1 }
   | bit_expr not_opt IN '(' selectClause ')' { $$ = { type: 'InSubQueryPredicate', hasNot: $2, left: $1 ,right: $5 } }
@@ -416,7 +421,7 @@ predicate
   | bit_expr not_opt BETWEEN bit_expr AND predicate { $$ = { type: 'BetweenPredicate', hasNot: $2, left: $1, right: { left: $4, right: $6 } } }
   | bit_expr SOUNDS LIKE bit_expr { $$ = { type: 'SoundsLikePredicate', hasNot: false, left: $1, right: $4 } }
   | bit_expr not_opt LIKE simple_expr escape_opt { $$ = { type: 'LikePredicate', hasNot: $2, left: $1, right: $4, escape: $5 } }
-  | bit_expr not_opt REGEXP bit_expr { $$ = { type: 'RegexpPredicate', hasNot: $2, left: $1, right: $4 } }
+  | bit_expr not_opt regexp_or_rlike bit_expr { $$ = { type: $3, hasNot: $2, left: $1, right: $4 } }
   ;
 comparison_operator
   : '=' { $$ = $1 }

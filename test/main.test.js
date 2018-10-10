@@ -401,5 +401,8 @@ describe('select grammar support', function () {
       testParser('SELECT NEXT VALUE FOR Test.CountBy1 OVER (ORDER BY LastName) AS ListNumber, FirstName, LastName FROM Person.Contact');
   });
 
+  it('RLIKE', function () {
+      testParser("SELECT ' % SystemDrive %\Users\John' rlike '% SystemDrive %\\Users.*'");
+  });
 });
 

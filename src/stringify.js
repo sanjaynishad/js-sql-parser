@@ -311,6 +311,14 @@ Sql.prototype.travelRegexpPredicate = function (ast) {
   this.appendKeyword('regexp');
   this.travel(ast.right);
 }
+Sql.prototype.travelRLikePredicate = function (ast) {
+    this.travel(ast.left);
+    if (ast.hasNot) {
+        this.appendKeyword('not');
+    }
+    this.appendKeyword('rlike');
+    this.travel(ast.right);
+}
 Sql.prototype.travelIsNullBooleanPrimary = function (ast) {
   this.travel(ast.value);
   this.appendKeyword('is');
